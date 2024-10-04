@@ -1,0 +1,21 @@
+Sat Sep  9 10:16:29 EDT 2023
+
+- Added support for writing to different files for different sensors
+  -U # is used to specify the # of sensors
+  -O path/file is used as the basis of the names when -U # is used.
+     So -U 2 results in files path/file0 path/file1
+
+- Started generally but decided I would just support 2 for now.
+
+- Changed to malloc/calloc memory that was previously on the stack in
+  deocde.c
+
+- Adding -0 # options to specify what type of sensor sensor 0 is
+- Adding -1 # options to specify what type of sensor sensor 1 is
+See sensor.h for the different sensor types
+- Note that currently SENSOR_TYPE_ANGLE uses factor and offset
+  and so does SENSOR_TYPE_LIGHT - we may need to change the way
+  that one of these works.
+
+  Maybe for ANGLE we just give MAX_VALUE and use 2^B / MAX_VALUE
+  as the factor and don't use an offset - or something like that

@@ -1,0 +1,30 @@
+#!/bin/bash
+decode_opts_v='-P 3 -M 3 -B 5 -e -v  -N 64 '
+decode_opts='-P 3 -M 4 -B 3 -e -l 10 -q -f 1 -o 0 -s 2 -N 64 -O /root/witag/src/sensors/sensor1.txt'
+#decode_opts='-P 3 -M 3 -B 5 -e -l 25 -v -f 1 -o 0 -s 2 -N 64 '
+
+tcpdump='tcpdump -XXnl -i mon type ctl | grep -A 6 "BA RA:00:22:33:44:aa:a0"'
+decode=decode
+getba=get-blockacks
+# Old way
+# cat $1 | while read line; do echo $line; done | $getba 00:22:33:44:aa:a0 $2 | ../decode/decode $decode_opts $file_name
+
+#$tcpdump | ./demo-ap 00:22:33:44:aa:a0 fakename | $decode $decode_opts 
+
+if [ $1 -eq 0 ]
+then
+	tcpdump -XXnl -i mon type ctl | $getba 00:22:33:44:aa:90 fakename | $decode $decode_opts
+elif [ $1 -eq 1 ]
+then 
+	echo "Got Here"
+	tcpdump -XXnl -i mon type ctl | $getba 00:22:33:44:aa:90 fakename  
+elif [ $1 -eq 2 ]
+then
+        tcpdump -XXnl -i mon type ctl > $2
+
+elif [ $1 -eq 3 ]
+then
+        tcpdump -XXnl -i mon type ctl | $getba 00:22:33:44:aa:90 fakename | $decode $decode_opts_v
+
+fi
+

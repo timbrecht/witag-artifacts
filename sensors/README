@@ -1,0 +1,52 @@
+# The way this works is that sensor data gets writen into
+# files in a directory. E.g.,
+# sensors/sensor1.txt
+# sensors/sensor2.txt
+# sensors/sensor3.txt
+# The Tag sends the data to the AP and the AP writes
+# the values into these files where the web server
+# obtains the data that is served to the client
+# that requests it.
+
+# Note: let's assume the WiFi AP can be reached at
+#   192.168.86.1
+
+# On the WiFi AP
+# install nginx
+crew install nginx
+
+# Modify nginx configuration to not conflict with web server
+# already running (see change below)
+        # listen       80;
+        listen       6800;
+
+# I think this has been fixed (so ignore and see the point below).
+# I was having trouble with some file updates not being seen
+# Disabled sendfile may have fixed this.
+# I'm not sure if this was really the fix or not
+# but it did seem to work correctly after this
+    # sendfile        on;
+    sendfile        off;
+
+# Note that I've been able to tell the fetch call
+# to indicate to the server that it shouldn't be caching data
+# for the specified file. So this seems to work without have
+# to do the above
+
+# extract sensors.tgz into the nginx html directory
+cd /usr/local/share/nginx/html
+tar -xzf sensors.tgz
+
+# start nginx
+startnginx
+
+# In browser point at the server
+http://192.168.86.1:6800/sensors/
+
+# That will read
+# http://192.168.86.1:6800/sensors/index.html
+# which contains javascript code to display the
+# sensor readings in a table which are fetched from
+# the AP and displayed every second.
+
+

@@ -1,0 +1,84 @@
+28c28
+< const bool dbg_pkt = true;
+---
+> const bool dbg_pkt = false;
+125d124
+< static int gap_thold = INT_MAX;
+142d140
+<   printf("  -g # : gap threshold\n");
+275,281d272
+<   if (plen == expected_len) {
+< 		return true;
+< 	}
+< #endif
+< 
+< 
+< #if 0
+581c572
+<      int expected_num, char *expected, int verbose)
+---
+>      int expected_num, char *expected, int verbose, double delta_sec)
+645,649d635
+< 			 int gap = line_count - last_packet_line;
+< 
+<        if (gap >= gap_thold) {
+< 			   printf("BIG gap found at line_count = %d last packet was on line %d gap = %d\n", line_count, last_packet_line, gap);
+< 			 }
+652,655c638,640
+<          printf("Match on line %8d: num = %d [%32s] len = %d guessed %d (%s) gap = %5d (%5.1lf%%)",
+<                line_count, num, packet, plen, num, expected_str[num],
+<                gap, 100.0 / (double) gap); 
+< 
+---
+>          printf("Time since start %f seconds Match on line %8d: num = %d [%32s] len = %d guessed %d (%s) gap = %5d (%5.1lf%%)",
+>                delta_sec/1000,line_count, num, packet, plen, num, expected_str[num],
+>                line_count - last_packet_line, 100.0 / (double) (line_count - last_packet_line)); 
+885a871
+>    char t_delta_sec[MAX_LEN] = {0};
+938c924
+< 
+---
+>    double delta_sec = 0.0;
+976c962
+<    while ((ch = getopt(argc, argv, "a:d:ef:g:m:n:o:qpr:s:vw:z:AB:E:FI:LM:O:P:Sh?")) != -1) {
+---
+>    while ((ch = getopt(argc, argv, "a:d:ef:m:n:o:qpr:s:vw:z:AB:E:FI:LM:O:P:Sh?")) != -1) {
+1003,1007d988
+<        case 'g':
+<          gap_thold = atoi(optarg);
+<          printf("Using gap threshold = %d\n", gap_thold);
+<          break;
+< 
+1240d1220
+<    printf("gap_thold (-g) = %d\n", gap_thold);
+1377c1357
+<          fprintf(stderr, "Error on line %d = %s\n", line_count, line);
+---
+>          fprintf(stderr, "Error1 on line %d = %s\n", line_count, line);
+1388,1395c1368,1370
+<        if (index(line, ' ')) {
+<          printf("Not expecting input file to contain bitmap and expected string\n");  
+<          printf("Error on line %d = %s\n", line_count, line);
+<          exit(1);
+<        }
+< 
+<        retval = sscanf(line, "%s", bitmap);
+<        if (retval != 1) {
+---
+>       
+>        retval = sscanf(line, "%s %s %s %s %s %s %s %s", t_delta_sec,bitmap,bitmap,bitmap,bitmap,bitmap,bitmap,bitmap);
+>        if (retval < 7) {
+1398c1373
+<          fprintf(stderr, "Error on line %d = %s\n", line_count, line);
+---
+>          fprintf(stderr, "Error3 on line- %d = %s\n", line_count, line);
+1402c1377,1379
+< 
+---
+>      delta_sec = delta_sec + ((double) atoi(t_delta_sec))/1000.0;
+>      if (retval == 7)
+>         strcpy(bitmap,"0");
+1468c1445
+<           detect_with_lev(packet_str, line_count, expected_num, expected, verbose);
+---
+>           detect_with_lev(packet_str, line_count, expected_num, expected, verbose,delta_sec);

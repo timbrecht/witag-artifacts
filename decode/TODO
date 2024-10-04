@@ -1,0 +1,311 @@
+Sat Sep  9 10:15:09 EDT 2023
+
+- May need to change the way the new_value is compute for SENSOR_TYPE_LIGHT
+- Probably want to use offset and factor for the ANGLE sensor but
+  maybe not for the LIGHT sensor.
+- Would be nice not to have to add options for offsets and factors for both
+
+----------------------------------------------------------------------
+Wed Jun  7 10:35:57 CEST 2023
+- Added levenshtein_new and changed original to levenshtein_orig
+- Currently levenshtein calls the function we want
+- Could use -L option to specify.
+
+Sat Mar  4 20:31:49 EST 2023
+- Kamran and Manoj check if we should go back to the proper
+  way of doing regexes (i.e., using the actual expected length)
+
+In regexes.c
+ifdef OLDWAY
+    sprintf(tmp, "[0-1]{%d,%d}", (bits_per_packet * mpdus_per_bit) - 1,
+                  (bits_per_packet * mpdus_per_bit) + 1);
+#else
+    // TODO: Need to look at this carefully and figure out:
+    //       How to do this generally?
+    //       Do we need different versions for different devices?
+    //       Look at how this interacts with Levenstein
+    sprintf(tmp, "[0-1]{%d,%d}", (bits_per_packet * mpdus_per_bit) - 1,
+                  (bits_per_packet * (mpdus_per_bit+1) + 2));
+#endif
+
+
+Fri Mar 03 11:26:00 EST 2022
+ - Increase the decimal places of correct percentage on EXPECTED
+ line in the output.
+DONE
+
+ - Remove the lev_str array from the decode output.
+In levenshtein-new.c:
+static bool const print_lev_strings = false;
+DONE
+
+
+ - Check the accuracy of the Location information  in the output.
+ The output file ~/data/2023-02-27/b5/b5_1_5meterb05m03p03-00000.out
+ has surprisingly low percentage of preambles after Location 41 or
+ from where fits column is zero.
+
+
+Mon Nov 28 11:28:31 EST 2022
+- Look into possible cause of crash if no packets coming in
+- Could be stats related or data structure related (no values)
+- Happens with MAX_VALUES > 256 or more
+
+Mon Nov 21 13:50:38 EST 2022
+- Possibly regexes because they were changed for longer packets
+- Before processing data for the paper change the packet lengths we consider
+- Look into the addition of 1's at beginning and end for Lev and possibly
+  change to a different implementation
+- TODO: why is the theory for packet overlaps not matching in decode
+  and the paper
+- Our overlap probabilities seem kind of low.
+  Graph shows about 15% for ml=47 but getting 4%
+
+Mon Oct 31 15:41:52 EDT 2022
+- Check if this appears in the branch
+
+Sun 30 Oct 2022 11:49:05 PM EDT
+- At some point merge fix-dash-l into main
+
+----------------------------------------------------------------------
+Tue Oct 18 13:24:20 EDT 2022
+- create parameters for controlling how short and how long
+  packets we consider can be.
+  e.g., plen - x and plen + y.
+DONE  see -b and -c
+
+----------------------------------------------------------------------
+Sun Oct 16 20:56:43 EDT 2022
+- Look into doing an options that uses number of packets instead of block acks
+DONE -l # for now
+
+----------------------------------------------------------------------
+Sat Oct 15 11:25:59 EDT 2022
+
+64bit/2022-10-10/m_experiments/resplit
+results are different after refactoring
+Maybe global/local variable issue?
+  - something that was global or local was switched?
+
+< Pkt_rate_RE = 124.75 average_len = 47  64 Len 70.50%
+---
+> Pkt_rate_RE = 124.75 average_len = 47  64 Len 60.59%
+
+This is a general problem. The should be but isn't the same
+as the value at the end.
+
+< Pkt_rate_RE (before filters) = 110.35 average_len = 45  64 Len 59.82%
+---
+> Pkt_rate_RE (before filters) = 110.35 average_len = 45  64 Len 52.88%
+
+brecht@m1max.home 842% grep "^(64," new/*00000.out save-good/*00000.out
+new/64bitnear_3ms_b05m03p03-00000.out:(64, 98804, 52.677205, 0.526485)
+save-good/64bitnear_3ms_b05m03p03-00000.out:(64, 98804, 52.677205, 0.526485)
+
+----------
+- Figure if this is incorrect? int max_mpdus_p_ampdu = 32;
+DONE: That's the default -A # changes it. I've made default 64 now
+----------
+- n options might be messed up.
+  It seems that at some point we aren't seeing many packet in the window
+  when there should be several
+DONE MAYBE: seems like there are some dumps/experiments where 
+  there are pretty big gaps between packets - which causes problems.
+
+----------
+- Compute values for min number of zeros expected in a packet -z
+  and max -Z based on m, p, and b.
+----------
+- Work with Kamran to figure and use out the actual length of the A-MPDUs
+  instead of the length of the bitmap string which is now always 64
+
+----------------------------------------------------------------------
+Thu Oct 13 20:19:22 EDT 2022
+- What is the probability of overlapping with the A-MPDU header in such a way
+  that nothing gets received. I'm seeing lots of block ACKS (with all zeros).
+  E.g., 3-15%
+
+- Note that all bitmaps are now of length 64 -- may need code changes for that
+
+- Think more about how to create the regex because we are seeing more zeros than planned
+  and our packet lengths are longer than expected.
+
+- Look into modifications we made to Levenstein to account for longer packets
+  This might not be what we want to do and we may need to create longer versions as well.
+
+- Think more about what these should look like.
+  Maybe we should consider that 000 is more often 0000.
+  We should also look to see if we have 00000? when trying to send 000
+
+- Number of spurious zeros (or zero_thold -- too many zeros) should probably be done
+  based on the total message length -- and account for how we are getting extra zeros now.
+
+- Fix up the filtering stats so that they add up properly.
+DONE
+
+- Look at the different packet rate code.
+
+----------------------------------------------------------------------
+Wed Oct  5 14:55:21 EDT 2022
+- Print info about packet rate and witag message rate
+DONE
+
+----------------------------------------------------------------------
+Tue Oct  4 19:56:28 EDT 2022
+
+- Do a code reorg.
+  separate out and handle options better.
+  e.g., struct options {
+
+    }
+
+  
+- Dynamically allocate more of the data structures so we do not use 
+  max array lengths and they will be properly sized.
+
+Mon Jul  4 14:17:58 EDT 2022
+- Fix floating point exception on Tim's machine
+DONE
+
+- Compute expected number of A-MPDU's based on distribution of A-MPDU lengths
+  and their times (then compute difference between this and what was seen
+  to get an estimate of channel access overheads).
+DONE
+
+----------------------------------------------------------------------
+Bug?
+using
+kamran/Dumps/2022-02-10/1bit/
+../../../../tim/src/decode/decode -e -B 1 -M 4 -P 3 -v -w 100 p3b1m4-0_25m.ack
+
+
+is_packet: line = 2505 bitmap = 11111111111000000000001
+No match on: 11111111111000000000001
+
+      if (amble_filter && too_many_leading_trailing_zeros(bitmap, amble_filter)) {
+        if (dbg_pkt) printf("No match on: %s\n", bitmap);
+        filter_amble++;
+        continue;
+      }
+
+
+----------------------------------------------------------------------
+Look at turning on and off packet filtering
+
+Print out stats about block ack lengths
+
+Figure out why assertion isn't failing when text appears in
+the block ack file
+----------------------------------------------------------------------
+-w window size
+stats about ampdu len 
+stats about 0's in bACKs (percent)
+DONE
+----------------------------------------------------------------------
+Compilation was failing with large values for MAX_VALUES and WINDOW SIZE
+I think that there are probably stack variables somewhere that use these
+values. Might need to make some variables global if we need really
+large sizes for these
+----------------------------------------------------------------------
+In -v mode add output for interpacket gap
+DONE
+----------------------------------------------------------------------
+For
+#define ONE_BIT
+Check on 1.dat and whether or not some of the early lines should be decoded 
+correctly or not.
+----------------------------------------------------------------------
+On Google WiFi device this causes problems.
+
+It would be great if you can modify your code. I think you also
+suggested not to write the output if there are less than 3 packets
+with some value in the dump. Currently sometimes it changes value
+based on only 1 packet (mostly not the right value). I am attaching
+the copy you updated on the GoogleAP. Following are the warnings
+(errors) on googleAP.
+
+try-regex.c:481:39: error: format '%ld' expects argument of type 'long int', but argument 2 has type 'int' [-Werror=format=]
+   if (dbg_pre_post) printf("start = %ld\n", start_estimate - bitmap);
+                                     ~~^     ~~~~~~~~~~~~~~~~~~~~~~~
+                                     %d
+try-regex.c:483:37: error: format '%ld' expects argument of type 'long int', but argument 2 has type 'int' [-Werror=format=]
+   if (dbg_pre_post) printf("end = %ld endstr = %s\n", end_estimate - bitmap, end_estimate);
+                                   ~~^                 ~~~~~~~~~~~~~~~~~~~~~
+                                   %d
+cc1: all warnings being treated as errors
+
+
+----------------------------------------------------------------------
+After the demo works, do a big code cleanup
+and reorg.  Try to move some of the functions into separate
+files so they can be used in other programs if we want (e.g.,
+packet filtering).
+----------------------------------------------------------------------
+Eventually modify the code so that before printing the value
+we have a calibration function that does calibration for a particular
+sensor. Or maybe that's done separately?
+
+value is 15
+value = calibrate(value, temperature_sensor)
+value is 21
+----------------------------------------------------------------------
+Opening and closing the output file has a lot of overhead.
+Can we change this to use fseek ?
+Write some blanks.
+See and write new value 
+so we don't have any residue from previous values.
+E.g.
+10
+9
+could be 
+90
+
+----------------------------------------------------------------------
+Having problems with some of these not converging to higher percentage
+of recognition with higher values of N.
+E.g., 11000.freq.800
+There are frequent guesses at different values.
+Is this because we are no longer actually transmitting
+packets or because we didn't get the boundaries right.
+----------------------------------------------------------------------
+For packet filter should filter out packets that are too short.
+----------------------------------------------------------------------
+For Levenshtein handle this case better
+num = 0 [        100000000000000001100001] guessed 0 (00000)
+expected = 00001 is NOT correct
+
+Possibly add a new pattern for lev_strings of what one should expect
+
+----------------------------------------------------------------------
+Look more carefully at my regexes.
+10,12 may mean check for 10 or 12 and not 10,11,12.
+That may need to be specified specifically.
+
+
+More than one packet filterr regexes match
+Should think about how to handle that.
+
+./try-regex -a 2 -p -z 16 -F 000.dat
+38819 bitmap = 11001100010001010110010010101111 packet str =     1000101011001001 databits = 14 packet_match on regex  1 : attempted num = 0 (000)
+38819 bitmap = 11001100010001010110010010101111 packet str =     1000101011001001 databits = 14 packet_match on regex  3 : attempted num = 0 (000)
+38819 bitmap = 11001100010001010110010010101111 packet str =    10001000101011001 databits = 15 packet_match on regex 10 : attempted num = 0 (000)
+----------------------------------------------------------------------
+
+Should probably change things so that we work with
+only the portion of the regex that gets matched.
+----------------------------------------------------------------------
+Try to do things relative to the start of the preamble (and not after)
+----------------------------------------------------------------------
+Match counts not right.
+----------------------------------------------------------------------
+%Expect might not be right.
+Differences with -p and without doesn't seem to be right.
+----------------------------------------------------------------------
+This doesn't seem to be much of a problem.g
+???
+The problem with trying to detect 000 right now is that
+there isn't any room for even one 1.
+----------------------------------------------------------------------
+Likewise for 111.
+The regex doesn't allow for any 1's
+

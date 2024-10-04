@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<!-- A lot of this has been size for a decently large font on a phone -->
+
+<style>
+table {
+  border-collapse: collapse;
+}
+
+th {
+  text-align: center;
+  padding: 5px;
+  font-size:65px;
+}
+
+td {
+  text-align: center;
+  padding: 5px;
+  font-size:65px;
+}
+
+table, th, td {
+  border: 2px solid black;
+}
+</style>
+
+
+<center>
+<table width="95%">
+  <tr>
+    <th colspan="3" id="date"></th>
+  </tr>
+  <tr>
+    <th>Sensor 1</th>
+  </tr>
+  <tr>
+    <td id="sensor1"></td>
+    
+  </tr>
+</table>
+</center>
+
+</body>
+</html>
+
+<script>
+URL = "http://192.168.0.28:6800/sensors/";
+SENSOR1 = URL + "sensor1.txt";
+SENSOR2 = URL + "sensor2.txt";
+SENSOR3 = URL + "sensor3.txt";
+
+var myVar = setInterval(getData, 1000);
+
+function adjust(num) {
+  if (num < 10) {
+    return "0" + num;
+  } else {
+    return num;
+  }
+}
+
+function getData() {
+
+var curdate = new Date();
+// displayDate = curdate;
+
+year = curdate.getFullYear();
+
+month = curdate.getMonth();
+month = month+1;
+month = adjust(month);
+
+date = curdate.getDate();
+date = adjust(date);
+
+hours = curdate.getHours();
+hours = adjust(hours);
+
+minutes = curdate.getMinutes();
+minutes = adjust(minutes);
+
+seconds = curdate.getSeconds();
+seconds = adjust(seconds);
+
+displayDate = ""
+displayDate = displayDate + year + "-" + month + "-" + date;
+displayDate = displayDate + "&nbsp; &nbsp" +  hours + ":" + minutes + ":" + seconds;
+
+document.getElementById("date").innerHTML = displayDate;
+
+// Note: ask the server not to cache so it continually reads the new value
+fetch(SENSOR1, {
+      headers: {
+       'Cache-Control': 'no-cache'
+      }})
+  .then(response => {
+    console.log('response', response);
+    console.log('response.status:', response.status);
+    console.log('response.statusText:', response.statusText);
+    console.log('response.ok:', response.ok);
+    return response.text();
+  })
+  .then(responseBody => {
+    console.log('responseBody:', responseBody);
+    var result = responseBody;
+    document.getElementById("sensor1").innerHTML = result + " C";
+    // document.getElementById("sensor1").style.fontSize = "xx-large";
+    // window.alert(responseBody);
+  })
+  .catch(error => console.error(`Error in fetch: ${error.message}`));
+
+
+
+// Note: ask the server not to cache so it continually reads the new value
+fetch(SENSOR2, { 
+      headers: {
+       'Cache-Control': 'no-cache'
+      }})
+  .then(response => {
+    console.log('response', response);
+    console.log('response.status:', response.status);
+    console.log('response.statusText:', response.statusText);
+    console.log('response.ok:', response.ok);
+    return response.text();
+  })
+  .then(responseBody => {
+    console.log('responseBody:', responseBody);
+    document.getElementById("sensor2").innerHTML = responseBody + " C";
+    // document.getElementById("sensor2").style.fontSize = "xx-large";
+  })
+  .catch(error => console.error(`Error in fetch: ${error.message}`));
+
+
+// Note: ask the server not to cache so it continually reads the new value
+fetch(SENSOR3, {
+      headers: {
+       'Cache-Control': 'no-cache'
+      }})
+  .then(response => {
+    console.log('response', response);
+    console.log('response.status:', response.status);
+    console.log('response.statusText:', response.statusText);
+    console.log('response.ok:', response.ok);
+    return response.text();
+  })
+  .then(responseBody => {
+    console.log('responseBody:', responseBody);
+    document.getElementById("sensor3").innerHTML = responseBody + "LUX";
+    // document.getElementById("sensor3").style.fontSize = "xx-large";
+  })
+  .catch(error => console.error(`Error in fetch: ${error.message}`));
+}
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,9 @@
+iw wlan0 link | grep SSID
+echo   "   "
+ifconfig | grep -A 2 mon
+echo "Moniter interfce is there"
+echo "  "
+iw wlan0 link | grep -A 2 tx
+echo "  "
+iw phy phy0 info | grep RTS
+

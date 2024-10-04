@@ -1,0 +1,7 @@
+ifconfig wlan0 mtu 256 up
+
+iw phy phy0 interface add mon type monitor
+ifconfig mon up
+iw phy phy0 set rts 1000
+iw phy phy0 set retry short 1 long 1
+iw wlan0 set bitrates ht-mcs-2.4 15   lgi-2.4
