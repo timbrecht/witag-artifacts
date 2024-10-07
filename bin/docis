@@ -1,0 +1,58 @@
+#!/bin/csh
+# echo $#argv
+if ($#argv < 1) then
+        echo "Usage: $0 file1 [file2] ... [fileN]"
+        exit 1
+endif
+
+set files="$argv"
+
+set out=messages.txt
+cp /dev/null $out
+foreach i ($files)
+	echo $i >> $out
+	fgrep "During" $i | awk '{print $20}' > tmp
+        ~/bin/confidence tmp >> $out
+        echo "--------------------" >> $out
+        echo "" >> $out
+end
+
+set out=expected.txt
+# echo "Expected Rates" > $out
+cp /dev/null $out
+foreach i ($files)
+	echo $i >> $out
+	fgrep "During" $i | awk '{print $16}' > tmp
+        ~/bin/confidence tmp >> $out
+        echo "--------------------" >> $out
+        echo "" >> $out
+end
+
+set out=regex.txt
+# echo "Regex Rates" > $out
+cp /dev/null $out
+foreach i ($files)
+	echo $i >> $out
+	fgrep "During" $i | awk '{print $24}' > tmp
+        ~/bin/confidence tmp >> $out
+        echo "--------------------" >> $out
+        echo "" >> $out
+end
+
+#echo "Filename" > filenames.txt
+cp /dev/null filenames.txt
+foreach i ($files)
+	echo -n $i >> filenames.txt
+	echo ": "  >> filenames.txt
+end
+
+fgrep "% conf interval: " expected.txt > tmp1
+fgrep "% conf interval: " regex.txt > tmp2
+fgrep "% conf interval: " messages.txt > tmp3
+#echo "Filename                       	        Expected Rates                         	Regex Rates                            	Actual Msg Rates" > compare.txt
+#paste filenames.txt tmp1 tmp2 tmp3 >> compare.txt
+echo "Filename                                                      Expected Rates                       Actual Msg Rates" > compare-wo-regex.txt
+paste filenames.txt tmp1 tmp3 >> compare-wo-regex.txt
+#cat compare.txt
+echo "-----------------------------------------"
+cat compare-wo-regex.txt

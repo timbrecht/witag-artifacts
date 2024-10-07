@@ -1,0 +1,53 @@
+#!/bin/bash
+SUBDIR=$(pwd)
+names="$SUBDIR/$1/*.bak"
+#echo $names
+# d="/tim/src/decode/decode"
+d="decode"
+dirstr=$(dirname $1)
+
+argB="$2"
+argM="$3"
+argP="$4"
+argE="$5"
+rungetblockacks="$6"
+argOtheroptions="$7"
+if [[ -d $1 ]]
+then
+	echo "Is a Dir"
+	for f in $names 
+	do
+	
+		#withoutext=$(basename $f .txt| cut -f 3- -d '_')
+		withoutext=$(basename $f .txt)
+		filename=$(basename -- "$f")
+		filename="${filename%.*}"
+	
+
+		#awk '{print $(NF)}' $f > "$SUBDIR/$1/$withoutext.ack"
+		#$SUBDIR/../../tim/src/decode/decode -e  -B 5 -M $2  -P 3 -v  "$SUBDIR/$1/$withoutext.ack" > "$SUBDIR/$1/$withoutext.out"
+		#awk '{print $(NF)}' $f > "$SUBDIR/$1/$withoutext.ack"
+		echo "INPUT FILE "
+		echo $f
+		echo "OUTPUT FILE "
+		echo "$SUBDIR/$1/$filename.bak "
+		$SUBDIR/../../tim/src/blockacks/new/new_run.sh "$SUBDIR/$1/$filename.bak " "$SUBDIR/$1/$filename.txt "
+		$SUBDIR/../../tim/src/decode/decode -e -L -B $2 -M $3 -R 10 -P $4 -N 64 -v   "$SUBDIR/$1/$filename.txt " > "$SUBDIR/$1/$filename.out"
+	done
+else
+	echo $1
+	withoutext=$(basename $1 .txt)
+	filename=$(basename -- "$1")
+	extension="${filename##*.}"
+	filename="${filename%.*}"
+	#awk '{print $(NF)}' $1 > "$withoutext.ack"
+	echo $filename
+	#$SUBDIR/../../tim/src/decode/decode -n 1000 -w 100 -e -E $5 -L -B $2 -M $3 -R 10 -P $4 -N 64 -v  "$1" > "$withoutext.out"
+	#$SUBDIR/../../tim/src/blockacks/new/new_run.sh $1 "$withoutext.txt"
+	
+	if [ $rungetblockacks -ne 1 ]
+	then
+		cat $1   | get-blockacks 00:22:33:44:aa:90 "$filename.txt"
+	fi
+	decode  -e -E $argE -L -B $argB -M $argM  -P $argP -N 64 -v $argOtheroptions  "$filename.txt" > "$filename.out"
+fi

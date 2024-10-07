@@ -1,0 +1,40 @@
+#!/bin/csh
+# echo $#argv
+if ($#argv < 1) then
+	echo "Usage: $0 file1 [file2] ... [fileN]"
+	exit 1
+endif
+
+set files="$argv"
+
+
+echo "At start of experiment"
+foreach i ($files)
+        echo $i
+	fgrep "gap = " $i | head -10
+        echo "-----------------"
+end
+
+echo ""
+echo "============================================"
+echo "Biggest gaps in all of experiment"
+foreach i ($files)
+        echo $i
+	fgrep "gap = " $i | sort -k 25 -nr | head -10
+        echo "-----------------"
+end
+
+
+echo ""
+echo "============================================"
+echo "Gap Confidence Intervals"
+foreach i ($files)
+        echo $i
+        cp /dev/null gaps.tmp
+	fgrep "gap = " $i | awk '{print $25}' > gaps.tmp
+        ~/bin/confidence gaps.tmp
+        echo "-----------------"
+	# /bin/rm gaps.tmp
+end
+
+

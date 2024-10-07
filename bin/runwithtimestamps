@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$#" -lt 3 ]; then
+    echo " runwithtimestamps [Tag Timesampts File] [Input File] [option] <other options for decode>"
+    echo "option 0 to run everything, 1 to run only decode "
+    exit 1
+fi
+python3   ~/gitted/witag/kamran/scripts/runwithtimestamps.py  $1 $2 $3 $4

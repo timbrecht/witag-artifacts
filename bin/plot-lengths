@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+  echo "Usage: $0 file1 [file2] ... [fileN]"
+  exit 1
+fi
+
+# echo -n "Pre/postambles found in file = "
+# fgrep PRE $* | wc -l
+
+# fgrep PRE $* | grep "est_len = 6[0-4]" > tmp1.dat
+# echo -n "Block acks of length 60-64 = "
+# wc -l tmp1.dat
+
+echo "Len Line" > tmp2.dat
+awk '{print $6, $17}' tmp1.dat >> tmp2.dat
+plot-col 2 "Line#" 1 "Len" tmp2.dat
+

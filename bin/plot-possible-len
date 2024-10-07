@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]
+then
+  echo "Usage: $0 len file1 [file2] ... [fileN] > filename.pdf"
+  exit 1
+fi
+
+len=$1
+shift
+
+
+
+# echo -n "Pre/postambles found in file = "
+# fgrep PRE $* | wc -l
+
+# fgrep PRE $* | grep "est_len = 6[0-4]" > tmp1.dat
+# echo -n "Block acks of length 60-64 = "
+# wc -l tmp1.dat
+
+echo "Position" > tmp1.dat
+# TODO: 
+# if $len < 10  (2 spaces)
+if [ $len -lt 10 ]
+then
+  fgrep "PRE" $* | grep "possible_len =  $len" | grep "est_len = [4-6][0-9]" | awk '{print $3}' >> tmp1.dat
+else  
+   # (1 space)
+   fgrep "PRE" $* | grep "possible_len = $len" | grep "est_len = [4-6][0-9]" | awk '{print $3}' >> tmp1.dat
+fi
+
+plot-cdf "Position" tmp1.dat
+

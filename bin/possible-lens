@@ -1,0 +1,18 @@
+#!/bin/csh
+set sort_col=5
+set top_n=8
+
+if ($#argv < 1) then
+	echo "Usage: $0 file1 [file2] ... [fileN]"
+	exit 1
+endif
+
+set files="$argv"
+
+foreach i ($files)
+        echo $i
+        fgrep "tag_packet_len" $i
+        grep "Possible " $i | sort -nr -k $sort_col | head -n $top_n
+        echo "-----------------"
+end
+

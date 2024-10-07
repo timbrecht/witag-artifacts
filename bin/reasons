@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+  echo "Usage: $0 file1 [file2] ... [fileN]"
+  exit 1
+fi
+
+files=$*
+# echo $files
+
+# Reason                                                     Count Percent
+# By ACK len too short                                           0    0.00
+# By no zeros                                               150379   74.52
+# By no ones                                                 13380    6.63
+# By insufficient zeros                                       9342    4.63
+# By excess zeros                                             2414    1.20
+# By too many zeros before preamble or after postamble           0    0.00
+# By due to wrong packet length                                 92    0.05
+# By regexes                                                 26194   12.98
+
+strings=('By ACK' 'By no zeros' 'By no ones' 'By insufficient' 'By excess zeros' 'By too many zeros before' 'By regexes')
+
+
+for str in "${strings[@]}"; do
+        echo $str
+        for i in $files; do
+          # echo $i
+	  /bin/echo -n "$i : "
+          fgrep "$str" $i
+        done
+        echo "--------------------------------"
+done
+
+exit 0
+
+# foreach i (*.out)
+#    
+#         echo $i
+# 	fgrep "gap = " $i | head -10
+#         echo "-----------------"
+# end
+
+
+

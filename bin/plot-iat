@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]
+then
+  echo "Usage: $0 xrange_max block_ackfile1 [block_ackfile2] ... [block_ackfileN]"
+  exit 1
+fi
+
+xmax=$1
+shift 1
+# echo "xmax = $xmax"
+# echo "file = $file"
+# echo "args = $@"
+
+awk '{print $2}' $* > tmp.dat
+plot-cdf-xrange 1 $xmax tmp.dat
+

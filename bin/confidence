@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Tim Brecht  Mar 03/93
+#
+# NOTE: assumes data is approximately normally distributed
+#     : also note that you really should have > 15 samples
+#
+# generate mean, variance, 90% confidence intervals
+# to use type 'confidence <datafile>'
+# From Raj Jain pg 197, 204 and Table A.2
+# sample mean = (sum xi) / n
+# sample var = 1/(n-1) * sum((xi - mean)^2)
+# sample std dev = sqrt(var)
+# 90 % CI = 1.645 * std dev / sqrt(n);
+# 95 % CI = 1.96 * std dev / sqrt(n);
+# cov = stdev/mean
+
+awk '
+$1 != "" && $1 != "#" {n++; x2+=$1*$1; x+=$1;}
+END {     
+      m = x / n;
+      v = (x2 - ((x * x) /  n)) / ( n - 1);
+      s = sqrt(v);
+      d = 1.96 * s / sqrt(n); 
+      l = m - d;
+      h  = m + d;
+      printf("samples: %d\n", n);
+      printf("total  : %.4f  \t mean: %.4f\n", x, m);      
+      printf("var    : %.4f  \t std : %.4f\n", v, s);
+      printf("cov    : %.4f\n", s/m);
+      printf("confidence interval : %.4f\n", d);
+      printf("95%% conf interval: [%.4f, %.4f]\n",l ,h);
+      printf("percent of mean     :  %.2f%%\n", d*100/m);
+}
+  ' $1

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Takes a decode out file (e.g., plot-cdf file.out)
+# and prints a CDF of the lengths of Retry packets for the packets in the out file.
+
+usage="Usage: $0 file"
+
+if [ $# -ne 1 ]; then
+  echo "$usage"
+  exit 1
+fi
+
+filename=$(basename -- "$1")
+filename="${filename%.*}"
+grep -B 1 T_last_match $1 | grep PREAMBLE | awk '{print $17+1}' > tmp1.dat 
+echo "Len"  > tmp2.dat
+echo $filename
+awk 'NR==FNR{ pos[$1]; next }FNR in pos' tmp1.dat  "$filename.txt" | awk '{print $4}' >> tmp2.dat
+plot-cdf Len tmp2.dat > "NextPktLen-$filename.pdf"

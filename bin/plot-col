@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Plot one column of data vs another from specified files.
+# 
+# E.g.,
+# compare-cols 1 xlabel 3 ylabel file1 label1 file2 label2 file3 label3
+#   Will plot column 1 on the x-axis 3 on the y-axis for the files specified
+#   and will label the axes appropriately.
+
+usage="Usage: $0 xcol xlabel ycol ylabel file1 label1 [file2 label2] [file3 label3] ..."
+
+if [ $# -lt 5 ]; then
+  echo "$usage"
+  exit 1
+fi
+
+xcol=$1
+xlabel=$2
+ycol=$3
+ylabel=$4
+shift
+shift
+shift
+shift
+
+numfiles=$#
+# echo numfiles = $numfiles
+filelist=()
+# set -A filelist
+labellist=()
+# set -A labellist
+
+while [ $# -gt 0 ]
+do
+    # echo "$1"
+    filelist+=($1)
+    labellist+=($2)
+    shift
+    shift
+done
+
+# echo ${filelist[@]}
+
+echo "
+set terminal pdfcairo color dashed font 'Times New Roman,22'
+# set terminal pdfcairo color dashed font 'Times New Roman,22' size 5.0in,7.0in
+# set terminal png enhanced font 'Times New Roman,12'
+
+set key tmargin horizontal Left  center spacing 1.0 reverse samplen 1.5
+
+#       Red     Goldenrod Green  LightBlue  Purple  DarkBlue Black
+# colors=\"#F15A5A #DAA520 #4EBA6F  #87CEEB    #9400D3 #0000FF #000000\"
+
+#       Red        Green  LightBlue  Purple  DarkBlue Black
+colors=\"#F15A5A #4EBA6F  #87CEEB  #9400D3 #0000FF #000000\"
+
+# print colors
+linewidth=3
+
+# Input file contains comma-separated values fields
+# set datafile separator \",\"
+# set pointsize 0.08
+set xlabel '$xlabel' offset 0,0.5
+set ylabel '$ylabel' offset 1.25,0
+set grid
+
+files=\"${filelist[@]}\"
+# print files
+labels=\"${labellist[@]}\"
+# print labels
+
+# set yrange [0:66]
+# set xrange [50000:51000]
+
+plot for [i=1:words(files)] word(files,i) using $xcol:$ycol with points lw linewidth lc rgb word(colors,i) title word(labels, i)
+"  | gnuplot
+
+# Useful for debugging
+# "  > OUT
+
+

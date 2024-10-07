@@ -1,0 +1,20 @@
+#!/bin/csh
+if ($#argv < 1) then
+	echo "Usage: $0 file1 [file2] ... [fileN]"
+	exit 1
+endif
+
+set files="$argv"
+
+echo "Gap confidence"
+foreach i ($files)
+        # echo $i
+        cp /dev/null tmp.locations
+        echo "locations > locations.tmp"
+	fgrep "Location " $i | awk '{print $2, $3}' > tmp.locations
+        ~/bin/confidence tmp.locations
+        echo "-----------------"
+	# /bin/rm gaps.tmp
+end
+
+

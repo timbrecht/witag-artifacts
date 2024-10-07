@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+  echo "Usage: $0 file1 [file2] ... [fileN]"
+  exit 1
+fi
+
+# echo -n "Pre/postambles found in file = "
+# fgrep PRE $* | wc -l
+
+# fgrep PRE $* | grep "est_len = 6[0-4]" > tmp1.dat
+# echo -n "Block acks of length 60-64 = "
+# wc -l tmp1.dat
+
+#grep "Location  " $* > tmp0.dat
+
+#echo "Location Count" > tmp2.dat
+# Counts
+#fgrep "Location" $* > tmp1.dat
+awk -F "," '{print $1, $2}' $* >> tmp2.dat
+# "Interval","Packets"
+plot-col 1 "Interval" 2 "Packets" tmp2.dat
+

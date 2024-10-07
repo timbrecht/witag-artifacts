@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Takes a column and data file (e.g., 2 out.dat)
+# and produces a PDF file containing a graph
+# of the CDF of the values
+# NOTE: output is printed to stdout
+
+usage="Usage: $0 column_num file > filename.pdf"
+
+if [ $# -ne 2 ]; then
+  echo "$usage"
+  exit 1
+fi
+
+col=$1
+file=$2
+out=`basename $file`
+# xlabel=$3
+# ylabel=$4
+
+# /bin/echo "col = $col filename = $file"
+
+# set terminal postscript color dashed eps 'Times-Roman' 24
+echo "
+set terminal pdfcairo color dashed font 'Times-Roman, 24'
+set pointsize 1.50
+set xlabel 'Fraction <=' offset 0,0.5
+set ylabel 'CDF'
+set size 1.0,1.0
+set grid
+# set xrange [0.0:1.05]
+# set yrange [0.0:1.05]
+
+datafile='$file'
+# set datafile separator \",\"
+stats datafile using $col name \"usecol\"
+
+plot datafile using $col:(1./usecol_records) smooth cumulative lw 3 title \"\"
+"  | gnuplot 

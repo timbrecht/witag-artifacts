@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# grep "possible_len =  3 " b5m3p3-3ms-30sec-b05m03p03-11110.out | grep "est_len = [5-6][0-9]"
+
+if [ $# -lt 2 ]
+then
+  echo "Usage: $0 len file1 [file2] ... [fileN]"
+  exit 1
+fi
+
+len=$1
+shift
+
+if [ $len -lt 10 ]
+then
+  fgrep "PRE" $* | grep "possible_len =  $len" | grep "est_len = [4-6][0-9]"
+else  
+   # (1 space)
+   fgrep "PRE" $* | grep "possible_len = $len" | grep "est_len = [4-6][0-9]"
+fi
+

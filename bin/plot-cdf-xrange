@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# Takes a column and data file (e.g., plot-cdf AvgSpeed file.csv)
+# and prints a CDF of the values in the AvgSpeed column of the specified csv file.
+
+usage="Usage: $0 column_name xrange_max file"
+
+if [ $# -ne 3 ]; then
+  echo "$usage"
+  exit 1
+fi
+
+colname=$1
+xmax=$2
+file=$3
+out=`basename $file`
+col=0
+# xlabel=$3
+# ylabel=$4
+
+# /bin/echo "colname = $colname filename = $file" 
+cat /dev/null > col.tmp
+cat /dev/null > data.tmp
+
+awk -F, -v colname=$colname '{
+  if (FNR == 1) {
+    for (i=0; i<NF; i++) {
+      # print $i
+      if ($i == colname) {
+         print i > "col.tmp"
+         col=i
+      }
+    }
+  } else {
+    if ($col != 'nan') {
+     print $col >> "data.tmp"
+    }
+  }
+}' $file
+
+# col=`cat col.tmp`
+
+fgrep -v "nan" data.tmp > tmp
+mv tmp data.tmp
+
+col=1
+file="data.tmp"
+
+echo "
+set terminal pdfcairo color dashed font 'Times-Roman, 8'
+set pointsize 1.50
+set xlabel 'Fraction <=' offset 0,0.5
+set ylabel 'CDF'
+set size 1.0,0.7
+set grid
+set key top left
+
+
+datafile='$file'
+# print 'Datafile = '
+# print datafile
+# print 'Col = '
+# print $col
+# print 'Colname = '
+# print $colname
+set datafile separator \"\t\"
+stats datafile using $col name \"usecol\"
+
+set yrange [0.0:1.05]
+set xrange [0.0:$xmax]
+
+plot datafile using $col:(1./usecol_records) smooth cumulative lw 3 title \"$colname\"\
+"  | gnuplot 
+
