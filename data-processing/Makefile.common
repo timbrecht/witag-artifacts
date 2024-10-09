@@ -1,0 +1,10 @@
+
+redecode:
+	runwithtimestamps  $(TIME_STAMPS) $(BAK_FILE) 1  $(DECODE_OPTS)
+
+all:
+	runwithtimestamps  $(TIME_STAMPS) $(BAK_FILE) 0  $(DECODE_OPTS)
+
+decode:
+	runwithtimestamps  $(TIME_STAMPS) $(BAK_FILE) 1
+

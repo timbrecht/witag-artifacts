@@ -1,0 +1,6 @@
+DECODE_OPTS="-i -R 10 -b 1 -c 1"
+BAK_FILE=all.bak
+TIME_STAMPS=timestamps.txt
+
+include $(HOME)/data/Makefile.common
+
